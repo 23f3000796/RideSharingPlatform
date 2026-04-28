@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="header_padding_horizontal">24dp</dimen>
+    <dimen name="header_padding_top">32dp</dimen>
+    <dimen name="header_padding_bottom">32dp</dimen>
+
+    <dimen name="card_corner_radius">20dp</dimen>
+    <dimen name="card_elevation">6dp</dimen>
+    <dimen name="card_padding">20dp</dimen>
+
+    <dimen name="icon_container_size">56dp</dimen>
+    <dimen name="icon_size">24dp</dimen>
+</resources>
