@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Development config: the NestJS backend runs over plain HTTP on the dev machine
+  (emulator 10.0.2.2, or the laptop's LAN IP when testing on a phone, e.g. 192.168.x.x / 10.x.x.x).
+  The previous config only allowed 10.0.2.2/localhost, which silently blocked the LAN IP
+  set in API_BASE_URL, so the app could not reach the backend on a real device.
+  Point API_BASE_URL at an HTTPS host before shipping a release build.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
