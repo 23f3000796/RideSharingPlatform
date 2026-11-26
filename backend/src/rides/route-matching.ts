@@ -10,10 +10,10 @@
  *   4. picking them up and dropping them off does not force the driver into
  *      an unreasonable detour.
  *
- * The route is modelled as a polyline. Today rides only store their two
- * endpoints, so the polyline is the straight segment between them, but every
- * function here works on an arbitrary list of points so road-following
- * polylines can be plugged in later without touching the maths.
+ * The route is a polyline: the real road route from OSRM when available,
+ * otherwise the straight segment between the driver's endpoints.
+ * For road routes, distances to the route are distances to the actual road
+ * the driver uses, and the riding distance is measured along that road.
  *
  * Distances use an equirectangular projection around the route, which is
  * accurate to well under 1% for city-scale trips (< 100 km).
@@ -27,7 +27,11 @@ export interface LatLng {
 export interface MatchOptions {
   /** Max distance (km) between the passenger's points and the driver's route. */
   radiusKm: number;
-  /** Max extra distance (km) the driver may have to drive. Defaults to max(3, 2 * radius, 35% of route). */
+  /**
+   * Max extra distance (km) the driver may have to drive to fetch / drop the passenger at their door.
+   * Default: max(3, 2 * radius, 35% of route) for straight-line routes. For road routes the
+   * passenger walks to the road (bounded by radius), so no detour limit applies unless set.
+   */
   maxDetourKm?: number;
 }
 
@@ -46,8 +50,10 @@ export interface RouteMatch {
   detourKm: number;
   /** Length of the driver's route (km). */
   routeKm: number;
-  /** Length of the passenger's own trip (km). */
+  /** Length of the passenger's own trip (km): along the road for road routes. */
   passengerTripKm: number;
+  /** True when matched against a road route (vs straight line). */
+  roadRoute: boolean;
   /** Share of the passenger's trip that overlaps the driver's route (0..1). */
   overlapRatio: number;
   /** Lower is better. Used to rank results. */
@@ -137,7 +143,8 @@ export function matchPassengerToRoute(
   const pickup = projectOntoRoute(route, passengerPickup);
   const drop = projectOntoRoute(route, passengerDrop);
   const routeKm = pickup.routeKm;
-  const passengerTripKm = haversineKm(passengerPickup, passengerDrop);
+  const roadRoute = route.length > 2;
+  const straightTripKm = haversineKm(passengerPickup, passengerDrop);
 
   // 1 + 2: both points close to the route
   if (pickup.distanceKm > radiusKm || drop.distanceKm > radiusKm) return null;
@@ -151,19 +158,27 @@ export function matchPassengerToRoute(
     // same spot (e.g. both near the start), but never a reversed trip.
     const directionToleranceKm = Math.min(0.3, routeKm * 0.05);
     if (drop.alongKm + directionToleranceKm <= pickup.alongKm) return null;
-    if (passengerTripKm > 0.5 && drop.alongKm - pickup.alongKm < 0.2) return null;
+    if (straightTripKm > 0.5 && drop.alongKm - pickup.alongKm < 0.2) return null;
   }
 
-  // 4: detour = (start -> P -> D -> end) - (start -> end)
-  const withPassenger =
-    haversineKm(start, passengerPickup) + passengerTripKm + haversineKm(passengerDrop, end);
-  const direct = haversineKm(start, end);
-  const detourKm = Math.max(0, withPassenger - direct);
-  const maxDetourKm = options.maxDetourKm ?? Math.max(3, 2 * radiusKm, direct * 0.35);
+  // 4: detour if the driver leaves the route to serve the passenger at their door.
+  let detourKm: number;
+  if (roadRoute) {
+    // Out to the passenger and back to the road, at both ends.
+    detourKm = 2 * (pickup.distanceKm + drop.distanceKm);
+  } else {
+    const withPassenger =
+      haversineKm(start, passengerPickup) + straightTripKm + haversineKm(passengerDrop, end);
+    detourKm = Math.max(0, withPassenger - haversineKm(start, end));
+  }
+  const maxDetourKm =
+    options.maxDetourKm ?? (roadRoute ? Number.POSITIVE_INFINITY : Math.max(3, 2 * radiusKm, haversineKm(start, end) * 0.35));
   if (detourKm > maxDetourKm) return null;
 
-  const overlapKm = Math.max(0, drop.alongKm - pickup.alongKm);
-  const overlapRatio = passengerTripKm > 0 ? Math.min(1, overlapKm / passengerTripKm) : 1;
+  const ridingKm = Math.max(0, drop.alongKm - pickup.alongKm);
+  const passengerTripKm = roadRoute ? ridingKm : straightTripKm;
+
+  const overlapRatio = straightTripKm > 0 ? Math.min(1, ridingKm / straightTripKm) : 1;
 
   const isExact =
     haversineKm(start, passengerPickup) <= EXACT_ENDPOINT_KM &&
@@ -180,6 +195,7 @@ export function matchPassengerToRoute(
     detourKm: round(detourKm),
     routeKm: round(routeKm),
     passengerTripKm: round(passengerTripKm),
+    roadRoute,
     overlapRatio: round(overlapRatio, 3),
     score,
   };

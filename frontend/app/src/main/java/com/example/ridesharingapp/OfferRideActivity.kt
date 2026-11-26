@@ -71,6 +71,9 @@ class OfferRideActivity : AppCompatActivity() {
     private var pickupAddress = ""
     private var dropAddress = ""
     private var tripKm = 0.0
+    private var tripMinutes: Double? = null
+    private var roadDistance = false
+    private var previewJob: kotlinx.coroutines.Job? = null
 
     private var suggestedPrice = 0
     private var customPrice: Int? = null
@@ -125,6 +128,7 @@ class OfferRideActivity : AppCompatActivity() {
             binding.tvPickup.text = pickupAddress
             binding.tvPickup.setTextColor(getColor(R.color.text_primary))
             recalcFare()
+            fetchRoadDistance()
         }
         dropMapLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val data = result.data ?: return@registerForActivityResult
@@ -135,6 +139,7 @@ class OfferRideActivity : AppCompatActivity() {
             binding.tvDrop.text = dropAddress
             binding.tvDrop.setTextColor(getColor(R.color.text_primary))
             recalcFare()
+            fetchRoadDistance()
         }
     }
 
@@ -195,13 +200,34 @@ class OfferRideActivity : AppCompatActivity() {
             renderPrice()
             return
         }
-        val dist = FloatArray(1)
-        Location.distanceBetween(pLat, pLng, dLat, dLng, dist)
-        // Straight-line distance × 1.3 ≈ road distance in a city
-        tripKm = dist[0] / 1000.0 * 1.3
+        if (!roadDistance) {
+            // Until the road route arrives: straight line × 1.3 ≈ city road distance
+            val dist = FloatArray(1)
+            Location.distanceBetween(pLat, pLng, dLat, dLng, dist)
+            tripKm = dist[0] / 1000.0 * 1.3
+        }
         val tripCost = BASE_FARE + tripKm * costPerKm(selectedVehicle)
         suggestedPrice = max(MIN_FARE, (tripCost / (selectedSeats + 1)).roundToInt())
         renderPrice()
+    }
+
+    /** Ask the backend (OSRM) for the real road distance whenever the endpoints change. */
+    private fun fetchRoadDistance() {
+        val pLat = pickupLat; val pLng = pickupLng; val dLat = dropLat; val dLng = dropLng
+        if (pLat == null || pLng == null || dLat == null || dLng == null) return
+        roadDistance = false
+        tripMinutes = null
+        previewJob?.cancel()
+        previewJob = lifecycleScope.launch {
+            RideSharingRepository.previewRoute(pLat, pLng, dLat, dLng).onSuccess { p ->
+                if (p.isRoad && p.distanceKm > 0) {
+                    tripKm = p.distanceKm
+                    tripMinutes = p.durationMin
+                    roadDistance = true
+                    recalcFare()
+                }
+            }
+        }
     }
 
     private fun renderPrice() {
@@ -214,7 +240,12 @@ class OfferRideActivity : AppCompatActivity() {
         binding.tvPriceBreakdown.text = if (customPrice != null) {
             "Custom price · suggested ₹$suggestedPrice"
         } else {
-            String.format(Locale.getDefault(), "≈ %.1f km · cost split between you and %d passenger(s)", tripKm, selectedSeats)
+            val distance = if (roadDistance) {
+                String.format(Locale.getDefault(), "%.1f km by road", tripKm) + (tripMinutes?.let { " · ~${it.roundToInt().coerceAtLeast(1)} min" } ?: "")
+            } else {
+                String.format(Locale.getDefault(), "≈ %.1f km", tripKm)
+            }
+            "$distance · cost split between you and $selectedSeats passenger(s)"
         }
     }
 

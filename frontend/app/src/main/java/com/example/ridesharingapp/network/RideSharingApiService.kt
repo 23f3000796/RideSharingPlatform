@@ -13,6 +13,7 @@ import com.example.ridesharingapp.network.dto.RequestBookingBodyDto
 import com.example.ridesharingapp.network.dto.ReviewDto
 import com.example.ridesharingapp.network.dto.RideDto
 import com.example.ridesharingapp.network.dto.RideEnvelopeDto
+import com.example.ridesharingapp.network.dto.RoutePreviewDto
 import com.example.ridesharingapp.network.dto.SearchRideRowDto
 import com.example.ridesharingapp.network.dto.SosRequestDto
 import com.example.ridesharingapp.network.dto.UpdateProfileRequestDto
@@ -66,6 +67,14 @@ interface RideSharingApiService {
         @Query("page") page: Int,
         @Query("limit") limit: Int,
     ): ApiEnvelope<List<SearchRideRowDto>>
+
+    @GET("api/v1/rides/route-preview")
+    suspend fun routePreview(
+        @Query("pickupLat") pickupLat: Double,
+        @Query("pickupLng") pickupLng: Double,
+        @Query("dropLat") dropLat: Double,
+        @Query("dropLng") dropLng: Double,
+    ): ApiEnvelope<RoutePreviewDto>
 
     @GET("api/v1/rides/my-rides")
     suspend fun getMyRides(

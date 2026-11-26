@@ -134,6 +134,8 @@ object ModelMapper {
         passengerTripKm = passengerTripKm ?: 0.0,
         pickupFraction = pickupFraction ?: 0.0,
         dropFraction = dropFraction ?: 1.0,
+        roadRoute = roadRoute == true,
+        pickupEtaMin = pickupEtaMin,
     )
 
     fun rideDtoToResult(dto: RideDto, avatarSeed: String = dto.driverId.orEmpty()): RideResult {
@@ -167,7 +169,9 @@ object ModelMapper {
             totalSeats = dto.totalSeats ?: (dto.seatsLeft ?: 0),
             avatarColor = avatarColorFor(avatarSeed),
             status = dto.status?.toRideUiStatus() ?: "Scheduled",
-            routeKm = dto.routeKm,
+            routeKm = dto.routeKm ?: dto.routeDistanceKm,
+            routePolyline = dto.routePolyline,
+            routeDurationMin = dto.routeDurationMin,
             myBookingStatus = myBooking?.status?.toBookingUiStatus(),
             myBookingId = myBooking?.id,
             myBookingSeats = myBooking?.seatsRequested ?: 0,
@@ -206,7 +210,8 @@ object ModelMapper {
             totalSeats = row.totalSeats ?: (row.seatsLeft ?: 0),
             avatarColor = avatarColorFor(row.driverId.orEmpty()),
             status = row.status?.toRideUiStatus() ?: "Scheduled",
-            routeKm = row.match?.routeKm,
+            routeKm = row.routeDistanceKm ?: row.match?.routeKm,
+            routeDurationMin = row.routeDurationMin,
             match = row.match?.toUi(),
             myBookingStatus = row.myBookingStatus?.toBookingUiStatus(),
         )

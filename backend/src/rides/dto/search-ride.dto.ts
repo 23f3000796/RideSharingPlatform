@@ -73,3 +73,33 @@ export class SearchRideDto extends PaginationQueryDto {
   @IsIn(['best', 'time', 'price'])
   sort?: 'best' | 'time' | 'price';
 }
+
+export class RoutePreviewDto {
+  @ApiProperty({ example: 22.7196 })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  pickupLat: number;
+
+  @ApiProperty({ example: 75.8577 })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  pickupLng: number;
+
+  @ApiProperty({ example: 22.7533 })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  dropLat: number;
+
+  @ApiProperty({ example: 75.8937 })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  dropLng: number;
+}

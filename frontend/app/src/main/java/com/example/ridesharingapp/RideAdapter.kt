@@ -57,6 +57,12 @@ class RideAdapter(
                     if (match.pickupDistanceKm >= 0.1) append(" away")
                     append(" · drop ${UiKit.km(match.dropDistanceKm)}")
                     if (match.dropDistanceKm >= 0.1) append(" away")
+                    val eta = match.pickupEtaMin
+                    if (eta != null && eta > 0 && ride.departureMillis > 0) {
+                        val at = java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault())
+                            .format(java.util.Date(ride.departureMillis + eta * 60_000L))
+                        append("\nReaches your pickup ~$at")
+                    }
                 }
             } else {
                 binding.tvPrice.text = "₹${ride.pricePerSeat}"

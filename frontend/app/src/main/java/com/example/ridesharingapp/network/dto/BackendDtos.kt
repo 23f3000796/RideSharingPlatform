@@ -111,6 +111,16 @@ data class RideDto(
     @SerializedName("myBooking") val myBooking: BookingRequestDto? = null,
     @SerializedName("passengers") val passengers: List<BookingRequestDto>? = null,
     @SerializedName("pendingRequests") val pendingRequests: Int? = null,
+    @SerializedName("routePolyline") val routePolyline: String? = null,
+    @SerializedName("routeDistanceKm") val routeDistanceKm: Double? = null,
+    @SerializedName("routeDurationMin") val routeDurationMin: Double? = null,
+)
+
+data class RoutePreviewDto(
+    @SerializedName("source") val source: String? = null,
+    @SerializedName("distanceKm") val distanceKm: Double? = null,
+    @SerializedName("durationMin") val durationMin: Double? = null,
+    @SerializedName("polyline") val polyline: String? = null,
 )
 
 data class CreateRideRequestDto(
@@ -147,6 +157,8 @@ data class RouteMatchDto(
     @SerializedName("routeKm") val routeKm: Double? = null,
     @SerializedName("passengerTripKm") val passengerTripKm: Double? = null,
     @SerializedName("overlapRatio") val overlapRatio: Double? = null,
+    @SerializedName("roadRoute") val roadRoute: Boolean? = null,
+    @SerializedName("pickupEtaMin") val pickupEtaMin: Int? = null,
 )
 
 /** Row from the route-matching search (ride columns + driver info + match). */
@@ -166,6 +178,8 @@ data class SearchRideRowDto(
     @SerializedName("totalSeats") val totalSeats: Int? = null,
     @SerializedName("seatsLeft") val seatsLeft: Int? = null,
     @SerializedName("status") val status: String? = null,
+    @SerializedName("routeDistanceKm") val routeDistanceKm: Double? = null,
+    @SerializedName("routeDurationMin") val routeDurationMin: Double? = null,
     @SerializedName("driverName") val driverName: String? = null,
     @SerializedName("driverGender") val driverGender: String? = null,
     @SerializedName("driverRating") val driverRating: Float? = null,

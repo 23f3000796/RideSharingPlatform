@@ -74,16 +74,14 @@ class RideSummaryActivity : AppCompatActivity(), OnMapReadyCallback {
             map.addMarker(MarkerOptions().position(pickup).title("Pickup"))
             map.addMarker(MarkerOptions().position(drop).title("Drop"))
 
+            val road = Polyline.decode(data.routePolyline).takeIf { it.size >= 2 } ?: listOf(pickup, drop)
             map.addPolyline(PolylineOptions()
-                .add(pickup, drop)
+                .addAll(road)
                 .width(12f)
                 .color(getColor(R.color.accent_blue))
                 .geodesic(true))
 
-            val bounds = LatLngBounds.Builder()
-                .include(pickup)
-                .include(drop)
-                .build()
+            val bounds = LatLngBounds.Builder().apply { road.forEach { include(it) } }.build()
 
             binding.root.post {
                 try {

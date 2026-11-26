@@ -11,6 +11,8 @@ import { SearchRideDto } from './dto/search-ride.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { APP_CONSTANTS, levelForPoints } from '../common/constants/app.constants';
 import { haversineKm, matchPassengerToRoute, proRatedFare, LatLng } from './route-matching';
+import { RoutingService } from '../routing/routing.service';
+import { decodePolyline } from '../routing/polyline';
 
 const DRIVER_PUBLIC_SELECT = {
   id: true,
@@ -27,7 +29,32 @@ const DRIVER_PUBLIC_SELECT = {
 
 @Injectable()
 export class RidesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private routing: RoutingService,
+  ) {}
+
+  /** Road route if OSRM answers, else the straight line between the endpoints. */
+  private routeOf(ride: { pickupLat: number; pickupLng: number; dropLat: number; dropLng: number; routePolyline?: string | null }): LatLng[] {
+    if (ride.routePolyline) {
+      const pts = decodePolyline(ride.routePolyline);
+      if (pts.length >= 2) return pts;
+    }
+    return [
+      { lat: ride.pickupLat, lng: ride.pickupLng },
+      { lat: ride.dropLat, lng: ride.dropLng },
+    ];
+  }
+
+  /** Preview the road route before publishing (distance, duration, polyline). */
+  async previewRoute(from: LatLng, to: LatLng) {
+    const road = await this.routing.route(from, to);
+    const straightKm = round(haversineKm(from, to));
+    if (!road) {
+      return { source: 'straight', distanceKm: straightKm, durationMin: null, polyline: null };
+    }
+    return { source: 'osrm', distanceKm: road.distanceKm, durationMin: road.durationMin, polyline: road.polyline };
+  }
 
   // ---------------------------------------------------------------- create
 
@@ -62,6 +89,12 @@ export class RidesService {
       throw new BadRequestException('You already have a ride scheduled around this time.');
     }
 
+    // Road route (best effort; null when OSRM is unreachable)
+    const road = await this.routing.route(
+      { lat: dto.pickupLat, lng: dto.pickupLng },
+      { lat: dto.dropLat, lng: dto.dropLng },
+    );
+
     let vehicleNumber = dto.vehicleNumber?.trim() || null;
     if (!vehicleNumber) {
       const me = await this.prisma.user.findUnique({ where: { id: userId }, select: { vehicleNumber: true } });
@@ -83,13 +116,16 @@ export class RidesService {
         pricePerSeat: dto.pricePerSeat,
         vehicleType: dto.vehicleType.trim(),
         vehicleNumber,
+        routePolyline: road?.polyline ?? null,
+        routeDistanceKm: road?.distanceKm ?? null,
+        routeDurationMin: road?.durationMin ?? null,
       },
       include: { driver: { select: DRIVER_PUBLIC_SELECT } },
     });
 
     return {
       message: 'Ride created successfully',
-      ride: { ...ride, routeKm: round(routeKm) },
+      ride: { ...ride, routeKm: ride.routeDistanceKm ?? round(routeKm) },
     };
   }
 
@@ -103,6 +139,21 @@ export class RidesService {
 
     if (!ride) {
       throw new NotFoundException('Ride not found');
+    }
+
+    // Rides created before road routing existed get their route on first view.
+    if (!ride.routePolyline && (ride.status === 'SCHEDULED' || ride.status === 'ONGOING')) {
+      const road = await this.routing.route(
+        { lat: ride.pickupLat, lng: ride.pickupLng },
+        { lat: ride.dropLat, lng: ride.dropLng },
+      );
+      if (road) {
+        await this.prisma.ride.update({
+          where: { id: ride.id },
+          data: { routePolyline: road.polyline, routeDistanceKm: road.distanceKm, routeDurationMin: road.durationMin },
+        });
+        Object.assign(ride, { routePolyline: road.polyline, routeDistanceKm: road.distanceKm, routeDurationMin: road.durationMin });
+      }
     }
 
     const isDriver = viewerId === ride.driverId;
@@ -127,9 +178,9 @@ export class RidesService {
 
     return {
       ...ride,
-      routeKm: round(
-        haversineKm({ lat: ride.pickupLat, lng: ride.pickupLng }, { lat: ride.dropLat, lng: ride.dropLng }),
-      ),
+      routeKm:
+        ride.routeDistanceKm ??
+        round(haversineKm({ lat: ride.pickupLat, lng: ride.pickupLng }, { lat: ride.dropLat, lng: ride.dropLng })),
       isDriver,
       myBooking,
       passengers,
@@ -184,8 +235,11 @@ export class RidesService {
     }
 
     const r = dto.radius;
-    const latPad = r / 111.0;
-    const lngPad = r / (111.0 * Math.max(0.2, Math.cos((dto.pickupLat * Math.PI) / 180)));
+    // Roads can bulge outside the endpoints' bounding box, so pad generously here;
+    // the exact check happens in JS against the real route.
+    const pad = r + 3;
+    const latPad = pad / 111.0;
+    const lngPad = pad / (111.0 * Math.max(0.2, Math.cos((dto.pickupLat * Math.PI) / 180)));
     const minLat = Math.min(dto.pickupLat, dto.dropLat);
     const maxLat = Math.max(dto.pickupLat, dto.dropLat);
     const minLng = Math.min(dto.pickupLng, dto.dropLng);
@@ -236,16 +290,16 @@ export class RidesService {
 
     const matched = candidates
       .map((ride) => {
-        const route: LatLng[] = [
-          { lat: ride.pickupLat, lng: ride.pickupLng },
-          { lat: ride.dropLat, lng: ride.dropLng },
-        ];
-        const match = matchPassengerToRoute(route, pickup, drop, { radiusKm: r });
+        const match = matchPassengerToRoute(this.routeOf(ride), pickup, drop, { radiusKm: r });
         if (!match) return null;
         const { score, ...matchInfo } = match;
+        // When the driver should reach the passenger's pickup point (road routes know the duration).
+        const pickupEtaMin =
+          typeof ride.routeDurationMin === 'number' ? Math.round(ride.routeDurationMin * match.pickupFraction) : null;
+        const { routePolyline: _p, ...rest } = ride;
         return {
-          ...ride,
-          match: matchInfo,
+          ...rest,
+          match: { ...matchInfo, pickupEtaMin },
           score,
           estimatedFare: proRatedFare(ride.pricePerSeat, match),
           myBookingStatus: bookingByRide.get(ride.id) ?? null,
