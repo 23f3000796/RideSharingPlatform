@@ -6,6 +6,23 @@
         <item name="colorSecondary">@color/accent_blue</item>
         <item name="android:statusBarColor">@color/status_bar</item>
         <item name="android:navigationBarColor">@color/primary_dark_blue</item>
+        <!-- Material 3 tints cards/dialogs with surface-container colours (grey-purple by default). Keep them white. -->
+        <item name="colorSurface">@color/card_background</item>
+        <item name="colorSurfaceContainerLowest">@color/card_background</item>
+        <item name="colorSurfaceContainerLow">@color/card_background</item>
+        <item name="colorSurfaceContainer">@color/card_background</item>
+        <item name="colorSurfaceContainerHigh">@color/card_background</item>
+        <item name="colorSurfaceContainerHighest">@color/neutral_bg</item>
+        <item name="materialCardViewStyle">@style/AppCard</item>
+        <!-- No primary-coloured tint on elevated surfaces (made white cards look grey-blue) -->
+        <item name="elevationOverlayEnabled">false</item>
     </style>
 
+
+    <!-- White cards everywhere (no Material 3 elevation tint) -->
+    <style name="AppCard" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/card_background</item>
+        <item name="android:outlineAmbientShadowColor">#33000000</item>
+        <item name="android:outlineSpotShadowColor">#33000000</item>
+    </style>
 </resources>

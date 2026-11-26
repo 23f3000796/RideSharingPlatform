@@ -41,7 +41,9 @@
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
                 android:text="Edit"
-                android:textAllCaps="false" />
+                android:textAllCaps="false"
+                android:textColor="@color/primary_dark_blue"
+                app:backgroundTint="@android:color/white" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -83,6 +85,7 @@
 
         <!-- Stats -->
         <com.google.android.material.card.MaterialCardView
+    app:cardBackgroundColor="@color/card_background"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"

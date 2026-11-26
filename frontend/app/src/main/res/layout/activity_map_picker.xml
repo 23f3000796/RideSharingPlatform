@@ -66,6 +66,7 @@
 
         <!-- 📦 STEP 3 & 4: Embed AutocompleteSupportFragment -->
         <com.google.android.material.card.MaterialCardView
+    app:cardBackgroundColor="@color/card_background"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -82,6 +83,7 @@
 
     <!-- 🏠 Bottom Card -->
     <com.google.android.material.card.MaterialCardView
+    app:cardBackgroundColor="@color/card_background"
         android:id="@+id/bottomCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

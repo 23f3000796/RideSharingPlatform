@@ -1,7 +1,7 @@
 import { decodePolyline } from './polyline';
 import { haversineKm, matchPassengerToRoute, proRatedFare, projectOntoRoute } from '../rides/route-matching';
 
-// Real OSRM response: University Main Gate -> Vijay Nagar Square, Indore (6.09 km by road)
+// Real OSRM response: Rajwada (old city) -> Vijay Nagar Square, Indore (6.09 km by road)
 const OSRM_CAMPUS_TO_VIJAY_NAGAR =
   'oltiCs}~mMs@_D}V_CiBeJj@qFsVkCv@wI|EsHyAsDgGeDyU{]eh@ij@kf@i`@wKcScFgA}@iFkXiCzA_OwHyA';
 
@@ -17,7 +17,7 @@ describe('polyline + road-route matching', () => {
     expect(pts[2].lng).toBeCloseTo(-126.453, 5);
   });
 
-  it('decodes the OSRM route with endpoints at campus and Vijay Nagar', () => {
+  it('decodes the OSRM route with endpoints at Rajwada and Vijay Nagar', () => {
     expect(road.length).toBeGreaterThan(5);
     expect(haversineKm(road[0], { lat: 22.7196, lng: 75.8577 })).toBeLessThan(0.05);
     expect(haversineKm(road[road.length - 1], { lat: 22.7533, lng: 75.8937 })).toBeLessThan(0.1);

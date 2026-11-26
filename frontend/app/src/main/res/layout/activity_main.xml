@@ -92,6 +92,7 @@
 
         <!-- Rewards / stats card overlapping the header -->
         <com.google.android.material.card.MaterialCardView
+    app:cardBackgroundColor="@color/card_background"
             android:id="@+id/cardRewards"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -276,7 +277,6 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minHeight="150dp"
                         android:orientation="vertical"
                         android:padding="18dp">
 
@@ -297,9 +297,7 @@
 
                         <View
                             android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="1"
-                            android:minHeight="16dp" />
+                            android:layout_height="28dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -334,7 +332,6 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minHeight="150dp"
                         android:orientation="vertical"
                         android:padding="18dp">
 
@@ -355,9 +352,7 @@
 
                         <View
                             android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="1"
-                            android:minHeight="16dp" />
+                            android:layout_height="28dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -380,6 +375,7 @@
 
             <!-- My rides -->
             <com.google.android.material.card.MaterialCardView
+    app:cardBackgroundColor="@color/card_background"
                 android:id="@+id/cardMyRides"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -447,6 +443,7 @@
 
             <!-- Leaderboard -->
             <com.google.android.material.card.MaterialCardView
+    app:cardBackgroundColor="@color/card_background"
                 android:id="@+id/cardLeaderboard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
