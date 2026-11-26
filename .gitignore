@@ -1,15 +1,27 @@
+# ---- Backend (NestJS)
+backend/node_modules/
+backend/dist/
+backend/coverage/
+backend/.env
+backend/generated/
+
+# ---- Android
+frontend/.gradle/
+frontend/build/
+frontend/app/build/
+frontend/local.properties
+frontend/.idea/
+frontend/*.iml
+frontend/captures/
+frontend/.externalNativeBuild/
+frontend/.cxx/
+
+# JVM crash dumps
+hs_err_pid*.log
+replay_pid*.log
+
+# IDE / OS
+.idea/
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+Thumbs.db

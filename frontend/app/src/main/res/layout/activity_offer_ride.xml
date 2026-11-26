@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light"
+    tools:context=".OfferRideActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:elevation="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_header_curve"
+            android:paddingTop="44dp"
+            android:paddingBottom="24dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/btnBack"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_centerVertical="true"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_back_arrow"
+                    android:background="@drawable/bg_icon_circle_white"
+                    app:tint="@color/text_primary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="Offer a Ride"
+                    android:textColor="@color/text_on_dark"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+        </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Route Section -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Route Details"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutPickup"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:background="@drawable/selector_input_field"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp">
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_location_pickup" />
+                        <TextView
+                            android:id="@+id/tvPickup"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:hint="Set pickup location"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
+                    </LinearLayout>
+
+                    <View android:layout_width="1dp" android:layout_height="12dp" android:layout_marginStart="23dp" android:background="@color/border_divider" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutDrop"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:background="@drawable/selector_input_field"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp">
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_location_drop" />
+                        <TextView
+                            android:id="@+id/tvDrop"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:hint="Set drop location"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Schedule -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:id="@+id/layoutDate"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_input_field"
+                    android:gravity="center_vertical"
+                    android:paddingStart="14dp">
+                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_calendar" />
+                    <TextView android:id="@+id/tvDate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="Date" android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layoutTime"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_input_field"
+                    android:gravity="center_vertical"
+                    android:paddingStart="14dp">
+                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_clock" />
+                    <TextView android:id="@+id/tvTime" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="Time" android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Available Seats"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="24dp">
+                <LinearLayout
+                    android:id="@+id/layoutSeats"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/chipSeat1" android:layout_width="50dp" android:layout_height="44dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_seat_chip" android:gravity="center" android:text="1" android:textStyle="bold" />
+                    <TextView android:id="@+id/chipSeat2" android:layout_width="50dp" android:layout_height="44dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_seat_chip" android:gravity="center" android:text="2" android:textStyle="bold" />
+                    <TextView android:id="@+id/chipSeat3" android:layout_width="50dp" android:layout_height="44dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_seat_chip" android:gravity="center" android:text="3" android:textStyle="bold" />
+                    <TextView android:id="@+id/chipSeat4" android:layout_width="50dp" android:layout_height="44dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_seat_chip" android:gravity="center" android:text="4" android:textStyle="bold" />
+                    <TextView android:id="@+id/chipSeat5" android:layout_width="50dp" android:layout_height="44dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_seat_chip" android:gravity="center" android:text="5" android:textStyle="bold" />
+                    <TextView android:id="@+id/chipSeat6" android:layout_width="50dp" android:layout_height="44dp" android:background="@drawable/bg_seat_chip" android:gravity="center" android:text="6" android:textStyle="bold" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vehicle Type"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="24dp">
+                <LinearLayout
+                    android:id="@+id/layoutVehicle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView android:id="@+id/chipScooter" android:layout_width="wrap_content" android:layout_height="44dp" android:paddingStart="16dp" android:paddingEnd="16dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_vehicle_chip" android:gravity="center" android:text="Scooter" android:textStyle="bold" />
+                    <TextView android:id="@+id/chipBike" android:layout_width="wrap_content" android:layout_height="44dp" android:paddingStart="16dp" android:paddingEnd="16dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_vehicle_chip" android:gravity="center" android:text="Bike" android:textStyle="bold" />
+                    <TextView android:id="@+id/chipAuto" android:layout_width="wrap_content" android:layout_height="44dp" android:paddingStart="16dp" android:paddingEnd="16dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_vehicle_chip" android:gravity="center" android:text="Auto" android:textStyle="bold" />
+                    <TextView android:id="@+id/chipHatchback" android:layout_width="wrap_content" android:layout_height="44dp" android:paddingStart="16dp" android:paddingEnd="16dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_vehicle_chip" android:gravity="center" android:text="Hatchback" android:textStyle="bold" />
+                    <TextView android:id="@+id/chipSedan" android:layout_width="wrap_content" android:layout_height="44dp" android:paddingStart="16dp" android:paddingEnd="16dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_vehicle_chip" android:gravity="center" android:text="Sedan" android:textStyle="bold" />
+                    <TextView android:id="@+id/chipSuv" android:layout_width="wrap_content" android:layout_height="44dp" android:paddingStart="16dp" android:paddingEnd="16dp" android:layout_marginEnd="8dp" android:background="@drawable/bg_vehicle_chip" android:gravity="center" android:text="SUV" android:textStyle="bold" />
+                    <TextView android:id="@+id/chipCuv" android:layout_width="wrap_content" android:layout_height="44dp" android:paddingStart="16dp" android:paddingEnd="16dp" android:background="@drawable/bg_vehicle_chip" android:gravity="center" android:text="CUV" android:textStyle="bold" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                android:id="@+id/cardPrice"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="#F0F7FF"
+                app:strokeColor="#CCE3FF"
+                app:strokeWidth="1dp"
+                android:layout_marginBottom="24dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Price per seat · tap to adjust"
+                            android:textColor="#1E40AF"
+                            android:textSize="12sp" />
+                        <TextView
+                            android:id="@+id/tvCalculatedPrice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="₹—"
+                            android:textColor="#1E40AF"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/tvPriceBreakdown"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Pick route and vehicle to estimate a fair cost-sharing price"
+                            android:textColor="#3B5BA9"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_currency"
+                        app:tint="#1E40AF" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Vehicle number"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/etVehicleNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/selector_input_field"
+                android:hint="e.g. MP09 AB 1234"
+                android:inputType="textCapCharacters"
+                android:maxLength="20"
+                android:padding="16dp"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="28dp"
+                android:text="Shown to passengers so they can identify your vehicle and for campus safety."
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnPublish"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_search_button"
+                android:text="Publish Ride"
+                android:textColor="@color/text_on_dark"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:layout_marginBottom="40dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
