@@ -28,6 +28,21 @@ The old logic only matched when A was within 5 km of the driver's *start* and B 
 of the driver's *end*. So anyone getting on or off part-way was never matched, there was no direction
 check, and the SQL itself was broken (a JS `Date` string was pasted into raw SQL).
 
+### Road routes (OSRM)
+
+When a driver publishes, the backend asks **OSRM** (OpenStreetMap routing, free, no API key) for
+the real road route and stores it on the ride (`routePolyline`, `routeDistanceKm`, `routeDurationMin`).
+Matching then measures distances to the actual road, the riding distance along it, and the
+time the driver reaches each passenger's pickup. Rides created before this get their route the
+first time someone opens them.
+
+* If OSRM is slow or down, the ride is saved without a road route and the straight line is used.
+  Publishing and searching never fail because of routing.
+* Default server: `https://router.project-osrm.org`, the public demo. It's fine for development
+  and demos, but it's rate-limited, has no uptime guarantee and only offers the car profile.
+  Set `OSRM_URL` in `backend/.env` to a self-hosted OSRM for anything heavier.
+* `GET /api/v1/rides/route-preview` gives the Offer Ride screen the road distance and duration for its price.
+
 Each result also carries:
 
 * `match.matchType`: `EXACT` (same start and end, within 1 km) or `ON_ROUTE` (joins or leaves part-way)
@@ -101,9 +116,9 @@ without changing the maths.
 ```bash
 cd backend
 npm install
-# .env needs DATABASE_URL (pooler), DIRECT_URL, JWT_SECRET, PORT
+# .env needs DATABASE_URL (pooler), DIRECT_URL, JWT_SECRET, PORT; optional OSRM_URL, OSRM_TIMEOUT_MS
 npx prisma generate
-npx prisma db push      # only if the database is new / schema changed. No schema changes were needed for these features
+npx prisma db push      # REQUIRED once: adds the road-route columns (routePolyline, routeDistanceKm, routeDurationMin) to Ride
 npx prisma db seed      # optional: WIPES users/rides/bookings and loads demo data (password: Password123!)
 npm run start:dev
 ```
@@ -132,7 +147,7 @@ Cleartext HTTP is allowed for development (`res/xml/network_security_config.xml`
 |---|---|
 | Auth | `POST auth/register`, `POST auth/login` |
 | Users | `GET/PUT users/profile`, `GET users/leaderboard`, `GET users/:id` |
-| Rides | `POST rides`, `GET rides/search`, `GET rides/my-rides`, `GET rides/:id`, `PATCH rides/:id/start \| complete \| cancel` |
+| Rides | `POST rides`, `GET rides/search`, `GET rides/route-preview`, `GET rides/my-rides`, `GET rides/:id`, `PATCH rides/:id/start \| complete \| cancel` |
 | Bookings | `POST bookings/request`, `GET bookings/my-bookings`, `GET bookings/incoming`, `GET bookings/ride/:rideId`, `PATCH bookings/:id/accept \| reject \| cancel` |
 | Reviews | `POST reviews`, `GET reviews/user/:id` |
 | SOS | `POST sos`, `GET sos/mine`, `GET sos/active` (security/admin), `PATCH sos/:id/resolve` |

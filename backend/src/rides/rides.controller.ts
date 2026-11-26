@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Patch, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { RidesService } from './rides.service';
 import { CreateRideDto } from './dto/create-ride.dto';
-import { SearchRideDto } from './dto/search-ride.dto';
+import { SearchRideDto, RoutePreviewDto } from './dto/search-ride.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -31,6 +31,15 @@ export class RidesController {
   @ApiResponse({ status: 200, description: 'List of matching rides, best match first' })
   async searchRides(@CurrentUser() user: any, @Query() searchRideDto: SearchRideDto) {
     return this.ridesService.searchRides(searchRideDto, user?.id);
+  }
+
+  @Get('route-preview')
+  @ApiOperation({ summary: 'Road distance, duration and polyline between two points (OSRM, falls back to straight line)' })
+  async routePreview(@Query() q: RoutePreviewDto) {
+    return this.ridesService.previewRoute(
+      { lat: q.pickupLat, lng: q.pickupLng },
+      { lat: q.dropLat, lng: q.dropLng },
+    );
   }
 
   @Get('my-rides')

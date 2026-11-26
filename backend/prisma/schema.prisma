@@ -94,7 +94,12 @@ model Ride {
   totalSeats    Int        // Never changes
   seatsLeft     Int        // Dynamically changes
   status        RideStatus @default(SCHEDULED)
-  
+
+  // Road route from OSRM (null = routing unavailable; straight line is used instead)
+  routePolyline    String?  // Google encoded polyline, precision 5
+  routeDistanceKm  Float?
+  routeDurationMin Float?
+
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   deletedAt     DateTime?  // Soft delete

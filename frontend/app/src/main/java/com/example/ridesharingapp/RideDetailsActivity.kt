@@ -89,6 +89,7 @@ class RideDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
                 )
                 ride = merged
                 bindRide(merged)
+                drawMap(fitCamera = false)
             }
         }
     }
@@ -131,7 +132,8 @@ class RideDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.tvPickup.text = r.pickupAddress
         binding.tvDrop.text = r.dropAddress
         binding.tvVehicle.text = listOf(r.vehicleType, r.vehicleNumber).filter { it.isNotBlank() }.joinToString(" • ").ifEmpty { "Vehicle details not added" }
-        binding.tvTime.text = "${r.date} • ${r.time}" + (r.routeKm?.let { String.format(Locale.getDefault(), "  ·  %.1f km trip", it) } ?: "")
+        binding.tvTime.text = "${r.date} • ${r.time}" + (r.routeKm?.let { String.format(Locale.getDefault(), "  ·  %.1f km", it) } ?: "") +
+            (r.routeDurationMin?.let { "  ·  ~${it.toInt().coerceAtLeast(1)} min" } ?: "")
         binding.tvSeatsLeft.text = when {
             r.seatsLeft <= 0 -> "Ride is full"
             else -> "${r.seatsLeft} of ${r.totalSeats} seats left"
@@ -166,7 +168,18 @@ class RideDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
                 append('\n')
                 append(String.format(Locale.getDefault(), "• You ride %.1f km of their %.1f km trip", m.passengerTripKm, m.routeKm))
             }
-            if (m.detourKm >= 0.3) {
+            m.pickupEtaMin?.let { eta ->
+                if (r.departureMillis > 0) {
+                    val at = java.text.SimpleDateFormat("hh:mm a", Locale.getDefault()).format(java.util.Date(r.departureMillis + eta * 60_000L))
+                    append('\n')
+                    append("• Driver reaches your pickup around $at")
+                }
+            }
+            if (!m.roadRoute) {
+                append('\n')
+                append("• Road route unavailable, so distances are straight-line estimates")
+            }
+            if (m.detourKm >= 0.3 && !m.roadRoute) {
                 append('\n')
                 append("• Adds about ${UiKit.km(m.detourKm)} to the driver's trip")
             }
@@ -306,19 +319,35 @@ class RideDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
         map.uiSettings.isMapToolbarEnabled = false
+        drawMap(fitCamera = true)
+    }
+
+    private var drawnPolyline: String? = "__none__"
+
+    /** Draw the driver's road route (or a straight line), the passenger's points and their stretch. */
+    private fun drawMap(fitCamera: Boolean) {
+        val map = googleMap ?: return
         val r = ride ?: return
+        if (!fitCamera && drawnPolyline == r.routePolyline) return // nothing new to draw
+        drawnPolyline = r.routePolyline
+        map.clear()
 
         val start = LatLng(r.pickupLat, r.pickupLng)
         val end = LatLng(r.dropLat, r.dropLng)
-        val bounds = LatLngBounds.Builder().include(start).include(end)
+        val road = Polyline.decode(r.routePolyline).takeIf { it.size >= 2 }
+        val route = road ?: listOf(start, end)
+        val bounds = LatLngBounds.Builder()
+        route.forEach { bounds.include(it) }
 
         map.addMarker(MarkerOptions().position(start).title("Driver starts").snippet(r.pickupAddress)
             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)))
         map.addMarker(MarkerOptions().position(end).title("Driver ends").snippet(r.dropAddress)
             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)))
-        map.addPolyline(PolylineOptions().add(start, end).width(12f).color(getColor(R.color.accent_blue)).geodesic(true))
+        map.addPolyline(
+            PolylineOptions().addAll(route).width(12f).color(getColor(R.color.accent_blue)).geodesic(road == null)
+                .apply { if (road == null) pattern(listOf(Dash(30f), Gap(16f))) },
+        )
 
-        // Passenger's own points + dashed "walk to the route" hints
         trip?.let { t ->
             val myPickup = LatLng(t.pickupLat, t.pickupLng)
             val myDrop = LatLng(t.dropLat, t.dropLng)
@@ -328,21 +357,25 @@ class RideDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
             map.addMarker(MarkerOptions().position(myDrop).title("Your destination").snippet(t.dropAddress)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)))
             r.match?.let { m ->
-                val pOnRoute = pointAlong(start, end, m.pickupFraction)
-                val dOnRoute = pointAlong(start, end, m.dropFraction)
+                val stretch = Polyline.slice(route, m.pickupFraction, m.dropFraction)
+                val pOnRoute = stretch.firstOrNull() ?: pointAlong(start, end, m.pickupFraction)
+                val dOnRoute = stretch.lastOrNull() ?: pointAlong(start, end, m.dropFraction)
                 val dash = listOf(Dash(20f), Gap(14f))
                 map.addPolyline(PolylineOptions().add(myPickup, pOnRoute).width(6f).color(Color.DKGRAY).pattern(dash))
                 map.addPolyline(PolylineOptions().add(dOnRoute, myDrop).width(6f).color(Color.DKGRAY).pattern(dash))
-                // Highlight the stretch the passenger rides
-                map.addPolyline(PolylineOptions().add(pOnRoute, dOnRoute).width(16f).color(getColor(R.color.success)).zIndex(1f))
+                if (stretch.size >= 2) {
+                    map.addPolyline(PolylineOptions().addAll(stretch).width(16f).color(getColor(R.color.success)).zIndex(1f))
+                }
             }
         }
 
-        binding.root.post {
-            try {
-                map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), UiKit.dp(this, 56)))
-            } catch (_: Exception) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(start, 13f))
+        if (fitCamera) {
+            binding.root.post {
+                try {
+                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), UiKit.dp(this, 56)))
+                } catch (_: Exception) {
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(start, 13f))
+                }
             }
         }
     }

@@ -54,6 +54,10 @@ data class RouteMatchInfo(
     val passengerTripKm: Double,
     val pickupFraction: Double,
     val dropFraction: Double,
+    /** Matched against the real road (OSRM) rather than a straight line. */
+    val roadRoute: Boolean = false,
+    /** Minutes after departure when the driver reaches the passenger's pickup point. */
+    val pickupEtaMin: Int? = null,
 ) : Parcelable {
     val isExact: Boolean get() = matchType.equals("EXACT", ignoreCase = true)
 }
@@ -107,6 +111,9 @@ data class RideResult(
     val pendingRequests: Int = 0,
     val isDriver: Boolean = false,
     val passengerNames: List<String> = emptyList(),
+    /** Encoded road route (OSRM); null = draw a straight line. */
+    val routePolyline: String? = null,
+    val routeDurationMin: Double? = null,
 ) : Parcelable
 
 @Parcelize

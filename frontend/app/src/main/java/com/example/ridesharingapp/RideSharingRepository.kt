@@ -143,6 +143,16 @@ object RideSharingRepository {
         }
     }
 
+    data class RoutePreview(val distanceKm: Double, val durationMin: Double?, val polyline: String?, val isRoad: Boolean)
+
+    suspend fun previewRoute(pLat: Double, pLng: Double, dLat: Double, dLng: Double): Result<RoutePreview> =
+        withContext(Dispatchers.IO) {
+            runApi {
+                val d = api.routePreview(pLat, pLng, dLat, dLng).requireData()
+                RoutePreview(d.distanceKm ?: 0.0, d.durationMin, d.polyline, d.source == "osrm")
+            }
+        }
+
     suspend fun getMyRides(page: Int = 1, limit: Int = 50): Result<List<RideResult>> = withContext(Dispatchers.IO) {
         runApi {
             api.getMyRides(page, limit).requireData().map { ModelMapper.rideDtoToResult(it) }
