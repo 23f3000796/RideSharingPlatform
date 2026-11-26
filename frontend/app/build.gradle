@@ -19,6 +19,12 @@ android {
 
         def baseUrl = project.findProperty("API_BASE_URL") ?: "http://10.236.209.81:3000/"
         buildConfigField "String", "API_BASE_URL", "\"${baseUrl}\""
+
+        // Map starts here when there is no GPS fix (Symbiosis University of Applied Sciences, Indore)
+        def campusLat = project.findProperty("CAMPUS_LAT") ?: "22.7533"
+        def campusLng = project.findProperty("CAMPUS_LNG") ?: "75.7921"
+        buildConfigField "double", "CAMPUS_LAT", "${campusLat}"
+        buildConfigField "double", "CAMPUS_LNG", "${campusLng}"
     }
 
     buildFeatures {

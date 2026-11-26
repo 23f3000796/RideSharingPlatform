@@ -50,7 +50,7 @@ export class SearchRideDto extends PaginationQueryDto {
   )
   @IsNumber()
   @Min(0.1)
-  radius: number;
+  radius: number = APP_CONSTANTS.SEARCH.DEFAULT_RADIUS_KM;
 
   @ApiProperty({ example: '2026-05-15T09:00:00Z', description: 'Earliest departure time (ISO)' })
   @IsDateString()

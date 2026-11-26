@@ -67,6 +67,14 @@ object UiKit {
         else -> String.format(Locale.getDefault(), "%.1f km", value)
     }
 
+    /** 95 -> "1h 35m", 20 -> "20m". */
+    fun duration(minutes: Int): String {
+        val m = minutes.coerceAtLeast(1)
+        return if (m >= 60) "${m / 60}h ${m % 60}m" else "${m}m"
+    }
+
+    fun plural(n: Int, one: String, many: String = one + "s") = "$n ${if (n == 1) one else many}"
+
     fun rating(value: Float): String = if (value <= 0f) "New" else String.format(Locale.getDefault(), "%.1f", value)
 
     fun greeting(): String {

@@ -50,8 +50,8 @@ class MapPickerActivity : AppCompatActivity(), OnMapReadyCallback {
         /** Optional camera start position (e.g. the previously chosen point). */
         const val EXTRA_START_LAT = "extra_start_lat"
         const val EXTRA_START_LNG = "extra_start_lng"
-        /** Fallback when there is no GPS fix: campus area used by the seed data (Indore). */
-        private val DEFAULT_CENTER = LatLng(22.7196, 75.8577)
+        /** Fallback when there is no GPS fix: the campus (set via CAMPUS_LAT / CAMPUS_LNG in Gradle). */
+        private val DEFAULT_CENTER = LatLng(BuildConfig.CAMPUS_LAT, BuildConfig.CAMPUS_LNG)
         const val RESULT_LATITUDE = "latitude"
         const val RESULT_LONGITUDE = "longitude"
         const val RESULT_ADDRESS = "address"
@@ -135,6 +135,9 @@ class MapPickerActivity : AppCompatActivity(), OnMapReadyCallback {
                 override fun onPlaceSelected(place: Place) {
                     Log.i(TAG, "Place selected: ${place.name}, ${place.id}")
                     place.latLng?.let { latLng ->
+                        // Keep the searched place's name as the label (reverse geocoding gives street names).
+                        val area = place.address?.split(",")?.drop(1)?.firstOrNull()?.trim()
+                        pickedPlace = latLng to listOfNotNull(place.name, area).distinct().joinToString(", ")
                         googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM))
                     }
                 }
@@ -191,6 +194,8 @@ class MapPickerActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private var geocodeJob: kotlinx.coroutines.Job? = null
+    /** Place chosen from search; used as the label while the pin stays on it. */
+    private var pickedPlace: Pair<LatLng, String>? = null
 
     private fun reverseGeocode(latLng: LatLng) {
         binding.tvAddress.text = getString(R.string.map_picker_searching)
@@ -199,6 +204,17 @@ class MapPickerActivity : AppCompatActivity(), OnMapReadyCallback {
         selectedAddress = ""
         binding.btnConfirm.isEnabled = false
         geocodeJob?.cancel()
+        pickedPlace?.let { (pos, label) ->
+            val d = FloatArray(1)
+            android.location.Location.distanceBetween(pos.latitude, pos.longitude, latLng.latitude, latLng.longitude, d)
+            if (d[0] < 40f && label.isNotBlank()) {
+                selectedAddress = label
+                binding.tvAddress.text = label
+                binding.btnConfirm.isEnabled = true
+                return
+            }
+            pickedPlace = null // the user moved the map away from the searched place
+        }
         geocodeJob = lifecycleScope.launch {
             val address = fetchAddress(latLng.latitude, latLng.longitude)
             selectedAddress = address

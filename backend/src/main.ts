@@ -1,37 +1,11 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
-import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { configureApp } from './app.setup';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  // Enable CORS for frontend and mobile access (reflect request Origin so credentials stay valid)
-  app.enableCors({
-    origin: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
-  });
-
-  // Global Exception Filter
-  app.useGlobalFilters(new AllExceptionsFilter());
-
-  // Global Interceptors (Response formatting & Serialization)
-  app.useGlobalInterceptors(
-    new TransformInterceptor(),
-    new ClassSerializerInterceptor(app.get(Reflector))
-  );
-
-  // Global Validation Pipe
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-    }),
-  );
+  configureApp(app);
 
   // Swagger setup
   const config = new DocumentBuilder()

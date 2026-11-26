@@ -92,7 +92,7 @@ class LeaderboardActivity : AppCompatActivity() {
             b.tvName.text = if (isMe) "${u.name} (you)" else u.name
             b.tvSub.text = listOfNotNull(
                 u.levelTitle,
-                "${u.ridesCompleted} trips",
+                UiKit.plural(u.ridesCompleted, "trip"),
                 u.rating.takeIf { it > 0f }?.let { "★${UiKit.rating(it)}" },
                 u.department?.takeIf { it.isNotBlank() },
             ).joinToString(" · ")
