@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="32dp">
+
+        <!-- Header -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="230dp"
+            android:background="@drawable/bg_header_curve">
+
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="36dp"
+                android:background="@drawable/bg_icon_circle_white"
+                android:contentDescription="Back"
+                android:padding="10dp"
+                android:src="@drawable/ic_back_arrow"
+                app:tint="@color/text_primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEdit"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="36dp"
+                android:layout_marginEnd="16dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="Edit"
+                android:textAllCaps="false" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="56dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvAvatar"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:gravity="center"
+                    android:textColor="@android:color/white"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    tools:text="YU" />
+
+                <TextView
+                    android:id="@+id/tvUserName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@color/text_on_dark"
+                    android:textSize="21sp"
+                    android:textStyle="bold"
+                    tools:text="Yash Upadhyay" />
+
+                <TextView
+                    android:id="@+id/tvUserLevel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/header_text_muted"
+                    android:textSize="13sp"
+                    tools:text="Road Buddy • Level 5" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- Stats -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="-28dp"
+            android:layout_marginEnd="20dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="18dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvRatingValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        tools:text="4.9" />
+
+                    <TextView
+                        android:id="@+id/tvRatingLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rating"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:background="@color/border_divider" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvRidesCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        tools:text="12" />
+
+                    <TextView
+                        android:id="@+id/tvRidesLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Trips"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:background="@color/border_divider" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvPoints"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        tools:text="500" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Points"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:id="@+id/layoutVerified"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/bg_verified_badge"
+            android:gravity="center"
+            android:padding="10dp">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_verified"
+                app:tint="@color/success" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Verified student"
+                android:textColor="#065F46"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Emergency contact -->
+        <TextView
+            style="@style/ProfileSectionTitle"
+            android:text="SAFETY" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardEmergency"
+            style="@style/ProfileCard"
+            android:clickable="true"
+            android:focusable="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_icon_circle_white"
+                    android:backgroundTint="@color/danger_bg"
+                    android:gravity="center"
+                    android:text="SOS"
+                    android:textColor="@color/danger"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvEmergencyName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold"
+                        tools:text="Mom (Parent)" />
+
+                    <TextView
+                        android:id="@+id/tvEmergencyPhone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp"
+                        tools:text="+91 98765 43210" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:contentDescription="Edit"
+                    android:src="@drawable/ic_arrow_forward" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- About -->
+        <TextView
+            style="@style/ProfileSectionTitle"
+            android:text="ABOUT" />
+
+        <com.google.android.material.card.MaterialCardView style="@style/ProfileCard">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout style="@style/ProfileRow">
+                    <TextView style="@style/ProfileRowLabel" android:text="Roll No" />
+                    <TextView android:id="@+id/tvRollNo" style="@style/ProfileRowValue" tools:text="22BCS101" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/ProfileRow">
+                    <TextView style="@style/ProfileRowLabel" android:text="Email" />
+                    <TextView android:id="@+id/tvEmail" style="@style/ProfileRowValue" tools:text="yash.u@university.edu" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/ProfileRow">
+                    <TextView style="@style/ProfileRowLabel" android:text="Department" />
+                    <TextView android:id="@+id/tvDepartment" style="@style/ProfileRowValue" tools:text="Computer Science" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/ProfileRow">
+                    <TextView style="@style/ProfileRowLabel" android:text="Course" />
+                    <TextView android:id="@+id/tvCourse" style="@style/ProfileRowValue" tools:text="B.Tech · Year 3" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/ProfileRow">
+                    <TextView style="@style/ProfileRowLabel" android:text="Gender" />
+                    <TextView android:id="@+id/tvGender" style="@style/ProfileRowValue" tools:text="Male" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/ProfileRow">
+                    <TextView style="@style/ProfileRowLabel" android:text="Blood group" />
+                    <TextView android:id="@+id/tvBlood" style="@style/ProfileRowValue" tools:text="O+" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/ProfileRow">
+                    <TextView style="@style/ProfileRowLabel" android:text="Vehicle" />
+                    <TextView android:id="@+id/tvVehicle" style="@style/ProfileRowValue" tools:text="MP09 AB 1234" />
+                </LinearLayout>
+
+                <LinearLayout
+                    style="@style/ProfileRow"
+                    android:layout_marginBottom="0dp">
+                    <TextView style="@style/ProfileRowLabel" android:text="College ID" />
+                    <TextView android:id="@+id/tvCollegeID" style="@style/ProfileRowValue" tools:text="ID-BCS101" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- History -->
+        <TextView
+            android:id="@+id/tvHistoryTitle"
+            style="@style/ProfileSectionTitle"
+            android:text="RIDES YOU OFFERED" />
+
+        <TextView
+            android:id="@+id/tvHistoryEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:text="No rides offered yet."
+            android:textColor="@color/text_secondary"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvRideHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:nestedScrollingEnabled="false"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            tools:listitem="@layout/item_ride_result" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/tvLogout"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:text="Sign out"
+            android:textAllCaps="false"
+            android:textColor="@color/danger"
+            app:cornerRadius="14dp"
+            app:strokeColor="@color/danger" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

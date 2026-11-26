@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+
+// --- ENUMS ---
+enum Role {
+  USER
+  ADMIN
+  SECURITY
+}
+
+enum RideStatus {
+  SCHEDULED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+enum SosStatus {
+  ACTIVE
+  RESOLVED
+}
+
+// --- MODELS ---
+model User {
+  id               String    @id @default(uuid())
+  name             String
+  rollNumber       String    @unique
+  collegeEmail     String    @unique
+  passwordHash     String
+  role             Role      @default(USER)
+  isVerified       Boolean   @default(false)
+  
+  // Detailed Profile System
+  department       String?
+  course           String?
+  year             Int?
+  dob              DateTime?
+  profilePhotoUrl  String?
+  gender           String?
+  bloodGroup       String?
+  emergencyContacts Json?    // JSON array of contacts
+  vehicleNumber    String?   // Default vehicle registered to user for safety/identification
+  
+  // Gamification & Stats
+  rating           Float?    @default(0) // 0 implies no ratings yet
+  rewardPoints     Int       @default(0)
+  ridesCompleted   Int       @default(0)
+  level            Int       @default(1) // 1 -> Newcomer, 2 -> Explorer, etc.
+  
+  // Device Token for Push Notifications
+  fcmToken         String?   
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime? // Soft delete
+
+  // Relations
+  ridesOffered     Ride[]           @relation("DriverRides")
+  bookings         BookingRequest[] @relation("PassengerBookings")
+  reviewsGiven     Review[]         @relation("ReviewAuthor")
+  reviewsReceived  Review[]         @relation("ReviewTarget")
+  sosAlerts        SosAlert[]
+
+  @@index([role])
+}
+
+model Ride {
+  id            String     @id @default(uuid())
+  driverId      String
+  driver        User       @relation("DriverRides", fields: [driverId], references: [id])
+  vehicleType   String
+  vehicleNumber String?    // The vehicle used for this specific ride
+  pickupAddress String
+  pickupLat     Float
+  pickupLng     Float
+  dropAddress   String
+  dropLat       Float
+  dropLng       Float
+  departureTime DateTime   // Unified date + time
+  pricePerSeat  Int
+  totalSeats    Int        // Never changes
+  seatsLeft     Int        // Dynamically changes
+  status        RideStatus @default(SCHEDULED)
+
+  // Road route from OSRM (null = routing unavailable; straight line is used instead)
+  routePolyline    String?  // Google encoded polyline, precision 5
+  routeDistanceKm  Float?
+  routeDurationMin Float?
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?  // Soft delete
+
+  bookings      BookingRequest[]
+  reviews       Review[]
+  sosAlerts     SosAlert[]
+
+  @@index([driverId])
+  @@index([status])
+  @@index([departureTime])
+}
+
+model BookingRequest {
+  id             String        @id @default(uuid())
+  rideId         String
+  ride           Ride          @relation(fields: [rideId], references: [id])
+  passengerId    String
+  passenger      User          @relation("PassengerBookings", fields: [passengerId], references: [id])
+  pickupAddress  String
+  dropAddress    String
+  seatsRequested Int
+  status         BookingStatus @default(PENDING)
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?     // Soft delete
+
+  @@index([passengerId])
+  @@index([rideId])
+  @@index([status])
+}
+
+model Review {
+  id         String    @id @default(uuid())
+  authorId   String
+  author     User      @relation("ReviewAuthor", fields: [authorId], references: [id])
+  targetId   String
+  target     User      @relation("ReviewTarget", fields: [targetId], references: [id])
+  rideId     String
+  ride       Ride      @relation(fields: [rideId], references: [id])
+  rating     Float
+  comment    String?
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime? // Soft delete
+}
+
+model SosAlert {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  rideId     String?
+  ride       Ride?     @relation(fields: [rideId], references: [id])
+  lat        Float?
+  lng        Float?
+  status     SosStatus @default(ACTIVE)
+  createdAt  DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([status])
+}
