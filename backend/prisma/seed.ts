@@ -3,6 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { BookingStatus, PrismaClient, RideStatus, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { Pool } from 'pg';
+import { RoutingService } from '../src/routing/routing.service';
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString?.trim()) {
@@ -70,7 +71,7 @@ async function main() {
       role: Role.USER,
       profilePhotoUrl: 'https://i.pravatar.cc/150?u=rahul',
       rewardPoints: 120,
-      level: 2,
+      level: 1,
       rating: 4.5,
       isVerified: false,
     },
@@ -125,7 +126,8 @@ async function main() {
   const passenger2 = createdUsers[4]; // Aman
 
   // 3. Create Rides (Indore realistic coordinates)
-  // Campus Area ~ 22.7196, 75.8577
+  // Campus: Symbiosis University of Applied Sciences, Super Corridor ~ 22.7533, 75.7921
+  // (the old seed used 22.7196, 75.8577, which is Rajwada in the old city, not the campus)
   // Bhawarkuan Area ~ 22.6934, 75.8682
   // Palasia ~ 22.7244, 75.8839
   // Vijay Nagar ~ 22.7533, 75.8937
@@ -138,9 +140,9 @@ async function main() {
   const ridesData = [
     {
       driverId: driver1.id,
-      pickupLat: 22.7196,
-      pickupLng: 75.8577,
-      pickupAddress: 'University Main Gate',
+      pickupLat: 22.7533,
+      pickupLng: 75.7921,
+      pickupAddress: 'SUAS Main Gate, Super Corridor',
       dropLat: 22.7533,
       dropLng: 75.8937,
       dropAddress: 'Vijay Nagar Square',
@@ -157,9 +159,9 @@ async function main() {
       pickupLat: 22.6934,
       pickupLng: 75.8682,
       pickupAddress: 'Bhawarkuan',
-      dropLat: 22.7196,
-      dropLng: 75.8577,
-      dropAddress: 'University Library',
+      dropLat: 22.7533,
+      dropLng: 75.7921,
+      dropAddress: 'SUAS Campus Library',
       departureTime: future2,
       totalSeats: 2,
       seatsLeft: 2, // 0 taken
@@ -173,9 +175,9 @@ async function main() {
       pickupLat: 22.7244,
       pickupLng: 75.8839,
       pickupAddress: 'Palasia Square',
-      dropLat: 22.7196,
-      dropLng: 75.8577,
-      dropAddress: 'University Girls Hostel',
+      dropLat: 22.7533,
+      dropLng: 75.7921,
+      dropAddress: 'SUAS Girls Hostel',
       departureTime: past,
       totalSeats: 4,
       seatsLeft: 1, // 3 taken, ride complete
@@ -186,9 +188,9 @@ async function main() {
     },
     {
       driverId: driver1.id, // Edge case: ride with no bookings yet
-      pickupLat: 22.7196,
-      pickupLng: 75.8577,
-      pickupAddress: 'University',
+      pickupLat: 22.7533,
+      pickupLng: 75.7921,
+      pickupAddress: 'SUAS Campus',
       dropLat: 22.7244,
       dropLng: 75.8839,
       dropAddress: 'Palasia',
@@ -202,13 +204,24 @@ async function main() {
     }
   ];
 
+  // Road routes from OSRM so search matches against real roads (null if OSRM is unreachable).
+  const routing = new RoutingService();
   const createdRides = [];
   for (const r of ridesData) {
+    const road = await routing.route({ lat: r.pickupLat, lng: r.pickupLng }, { lat: r.dropLat, lng: r.dropLng });
     const ride = await prisma.ride.create({
-      data: r,
+      data: {
+        ...r,
+        routePolyline: road?.polyline ?? null,
+        routeDistanceKm: road?.distanceKm ?? null,
+        routeDurationMin: road?.durationMin ?? null,
+      },
     });
     createdRides.push(ride);
-    console.log(`Created ride from ${ride.pickupAddress} to ${ride.dropAddress}`);
+    console.log(
+      `Created ride from ${ride.pickupAddress} to ${ride.dropAddress}` +
+        (road ? ` (${road.distanceKm} km by road)` : ' (no road route)'),
+    );
   }
 
   // 4. Create Bookings
@@ -217,7 +230,7 @@ async function main() {
     data: {
       rideId: createdRides[0].id,
       passengerId: passenger1.id,
-      pickupAddress: 'University Main Gate',
+      pickupAddress: 'SUAS Main Gate, Super Corridor',
       dropAddress: 'C21 Mall',
       seatsRequested: 1,
       status: BookingStatus.ACCEPTED,
@@ -229,7 +242,7 @@ async function main() {
     data: {
       rideId: createdRides[0].id,
       passengerId: passenger2.id,
-      pickupAddress: 'University Main Gate',
+      pickupAddress: 'SUAS Main Gate, Super Corridor',
       dropAddress: 'Vijay Nagar',
       seatsRequested: 1,
       status: BookingStatus.PENDING,
@@ -244,7 +257,7 @@ async function main() {
       pickupAddress: 'Palasia',
       dropAddress: 'Hostel',
       seatsRequested: 1,
-      status: BookingStatus.ACCEPTED, // accepted in past
+      status: BookingStatus.COMPLETED, // the ride itself is COMPLETED
     },
   });
 

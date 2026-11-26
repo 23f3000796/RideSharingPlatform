@@ -63,6 +63,7 @@
 
             <!-- Route Section -->
             <com.google.android.material.card.MaterialCardView
+    app:cardBackgroundColor="@color/card_background"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="16dp"

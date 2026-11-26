@@ -39,11 +39,11 @@ class RideSummaryActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         ride?.let {
-            binding.tvSummaryRoute.text = "Ride published 🎉  ${it.date}, ${it.time}"
+            binding.tvSummaryRoute.text = "${it.date}, ${it.time}" + (it.routeKm?.let { km -> String.format(java.util.Locale.getDefault(), " · %.1f km", km) } ?: "")
             binding.tvSummaryPickup.text = "From: ${it.pickupAddress}"
             binding.tvSummaryDrop.text = "To: ${it.dropAddress}"
             // pricePerSeat is an Int: the old "%.2f" format crashed this screen on every publish.
-            binding.tvSummaryPrice.text = if (it.pricePerSeat == 0) "Free" else "₹${it.pricePerSeat} / seat"
+            binding.tvSummaryPrice.text = if (it.pricePerSeat == 0) "Free" else "₹${it.pricePerSeat}  (₹${it.pricePerSeat * it.totalSeats} if full)"
             binding.tvSummarySeats.text = "${it.seatsLeft} seat(s) open · requests appear in My Rides"
         }
         binding.btnDone.text = "View my rides"
