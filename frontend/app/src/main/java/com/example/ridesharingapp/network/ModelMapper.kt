@@ -120,6 +120,16 @@ object ModelMapper {
         }
     }
 
+    /** "CAR" -> "Car", "SUV" stays "SUV". */
+    fun prettyVehicle(raw: String?): String {
+        val v = raw?.trim().orEmpty()
+        if (v.isEmpty()) return v
+        return when (v.uppercase(Locale.US)) {
+            "SUV", "CUV" -> v.uppercase(Locale.US)
+            else -> v.lowercase(Locale.US).replaceFirstChar { it.titlecase(Locale.US) }
+        }
+    }
+
     fun avatarColorFor(seed: String): Int {
         val hue = (abs(seed.hashCode()) % 360).toFloat()
         return Color.HSVToColor(floatArrayOf(hue, 0.45f, 0.85f))
@@ -151,7 +161,7 @@ object ModelMapper {
             driverGender = driver?.gender?.takeIf { it.isNotBlank() } ?: "Any",
             driverVerified = driver?.isVerified == true,
             driverLevel = driver?.level ?: 1,
-            vehicleType = dto.vehicleType.orEmpty(),
+            vehicleType = prettyVehicle(dto.vehicleType),
             vehicleNumber = dto.vehicleNumber.orEmpty(),
             pickupAddress = dto.pickupAddress.orEmpty(),
             pickupLat = dto.pickupLat ?: 0.0,
@@ -192,7 +202,7 @@ object ModelMapper {
             driverGender = row.driverGender?.takeIf { it.isNotBlank() } ?: "Any",
             driverVerified = row.driverVerified == true,
             driverLevel = row.driverLevel ?: 1,
-            vehicleType = row.vehicleType.orEmpty(),
+            vehicleType = prettyVehicle(row.vehicleType),
             vehicleNumber = row.vehicleNumber.orEmpty(),
             pickupAddress = row.pickupAddress.orEmpty(),
             pickupLat = row.pickupLat ?: 0.0,
@@ -233,7 +243,7 @@ object ModelMapper {
             driverName
         }
         val vehicle = listOfNotNull(
-            ride?.vehicleType?.takeIf { it.isNotBlank() },
+            prettyVehicle(ride?.vehicleType).takeIf { it.isNotBlank() },
             ride?.vehicleNumber?.takeIf { it.isNotBlank() },
         ).joinToString(" · ")
 

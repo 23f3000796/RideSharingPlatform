@@ -8,12 +8,14 @@ function toPositiveInt(value: unknown, fallback: number): number {
   return Number.isFinite(parsed) && parsed >= 1 ? Math.trunc(parsed) : fallback;
 }
 
+// Field initialisers provide defaults when a query param is omitted entirely:
+// @Transform only runs for keys that are present.
 export class PaginationQueryDto {
   @ApiPropertyOptional({ description: 'Page number', default: APP_CONSTANTS.PAGINATION.DEFAULT_PAGE })
   @Transform(({ value }) => toPositiveInt(value, APP_CONSTANTS.PAGINATION.DEFAULT_PAGE))
   @IsInt()
   @Min(1)
-  page: number;
+  page: number = APP_CONSTANTS.PAGINATION.DEFAULT_PAGE;
 
   @ApiPropertyOptional({ description: 'Items per page', default: APP_CONSTANTS.PAGINATION.DEFAULT_LIMIT })
   @Transform(({ value }) =>
@@ -25,5 +27,5 @@ export class PaginationQueryDto {
   @IsInt()
   @Min(1)
   @Max(APP_CONSTANTS.PAGINATION.MAX_LIMIT)
-  limit: number;
+  limit: number = APP_CONSTANTS.PAGINATION.DEFAULT_LIMIT;
 }

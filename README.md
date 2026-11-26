@@ -123,7 +123,22 @@ npx prisma db seed      # optional: WIPES users/rides/bookings and loads demo da
 npm run start:dev
 ```
 
-Swagger docs: `http://localhost:3000/api/docs`. Unit tests: `npm test`.
+Swagger docs: `http://localhost:3000/api/docs`.
+
+### Tests
+
+* **Unit** (`npm test`): route matching and polyline decoding, including a recorded OSRM route.
+* **End-to-end** (`npm run test:e2e`): boots the real API against a real PostgreSQL database and
+  runs every flow: auth, profile, publishing, route search, booking, accept/decline/cancel,
+  start/complete, points, reviews, SOS, ride cancellation, and two accepts racing for the last seat.
+  It refuses to run against anything except a local database, so it never touches Supabase.
+
+```bash
+docker run -d --name ridepool-testdb -e POSTGRES_PASSWORD=testpass -e POSTGRES_DB=ridepool_test -p 55432:5432 postgres:16-alpine
+export DATABASE_URL=postgresql://postgres:testpass@127.0.0.1:55432/ridepool_test
+npx prisma db push && npx prisma db seed
+npm run test:e2e
+```
 
 > If the API logs `connection to database not available`, the Supabase project is probably
 > paused (free tier pauses after inactivity). Resume it from the Supabase dashboard.

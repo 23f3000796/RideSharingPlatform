@@ -244,6 +244,7 @@ class MyRidesActivity : AppCompatActivity() {
                 // A ride cancelled by the driver shows as "Cancelled" for the passenger, not "Declined".
                 val shownStatus = when {
                     r.rideStatus == "Cancelled" && r.status != "Completed" -> "Cancelled"
+                    r.rideStatus == "Completed" && r.status == "Accepted" -> "Completed"
                     r.status == "Accepted" && r.rideStatus == "Ongoing" -> "Ongoing"
                     else -> r.status
                 }
@@ -272,6 +273,8 @@ class MyRidesActivity : AppCompatActivity() {
 
                 fun primary(text: String, colorRes: Int, action: () -> Unit) {
                     b.btnAccept.visibility = View.VISIBLE
+                    (b.btnAccept.layoutParams as ViewGroup.MarginLayoutParams).marginStart =
+                        if (b.btnReject.visibility == View.VISIBLE) UiKit.dp(b.root.context, 6) else 0
                     b.btnAccept.text = text
                     b.btnAccept.setBackgroundColor(b.root.context.getColor(colorRes))
                     b.btnAccept.setOnClickListener { action() }
@@ -308,11 +311,11 @@ class MyRidesActivity : AppCompatActivity() {
                         hint = if (r.rideStatus == "Ongoing") "On board now." else "Confirmed. Start the ride from the Offered tab."
                         b.layoutDriverControls.visibility = View.GONE
                     }
-                    r.status == "Completed" && !r.reviewed -> {
+                    shownStatus == "Completed" && !r.reviewed -> {
                         hint = "Trip completed."
                         primary(if (isDriver) "Rate passenger" else "Rate driver", R.color.gold) { onRate(r) }
                     }
-                    r.status == "Completed" -> {
+                    shownStatus == "Completed" -> {
                         hint = "Trip completed · thanks for rating!"
                         b.layoutDriverControls.visibility = View.GONE
                     }
@@ -344,6 +347,12 @@ class MyRidesActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(getItem(position))
 
         inner class ViewHolder(private val b: ItemOfferedRideBinding) : RecyclerView.ViewHolder(b.root) {
+            private fun primaryMargin(b: ItemOfferedRideBinding, single: Boolean) {
+                (b.btnPrimary.layoutParams as ViewGroup.MarginLayoutParams).marginStart =
+                    if (single) 0 else UiKit.dp(b.root.context, 6)
+                b.btnPrimary.requestLayout()
+            }
+
             fun bind(ride: RideResult) {
                 val booked = (ride.totalSeats - ride.seatsLeft).coerceAtLeast(0)
                 b.tvWhen.text = "${ride.date} • ${ride.time}"
@@ -369,15 +378,24 @@ class MyRidesActivity : AppCompatActivity() {
                     "Scheduled" -> {
                         UiKit.setVisible(b.layoutActions, true)
                         UiKit.setVisible(b.btnSecondary, true)
+                        primaryMargin(b, single = false)
                         b.btnSecondary.text = "Cancel ride"
                         b.btnSecondary.setOnClickListener { onCancel(ride) }
-                        b.btnPrimary.text = "Start ride"
-                        b.btnPrimary.setBackgroundColor(ctx.getColor(R.color.accent_blue))
+                        // The server only allows starting within 1 hour of departure.
+                        val minsToStart = ((ride.departureMillis - 60 * 60_000L - System.currentTimeMillis()) / 60_000L).toInt()
+                        val canStart = ride.departureMillis == 0L || minsToStart <= 0
+                        b.btnPrimary.isEnabled = canStart
+                        b.btnPrimary.text = if (canStart) "Start ride" else "Start in ${UiKit.duration(minsToStart)}"
+                        b.btnPrimary.setBackgroundColor(ctx.getColor(if (canStart) R.color.accent_blue else R.color.border_divider))
+                        b.btnPrimary.setTextColor(ctx.getColor(if (canStart) android.R.color.white else R.color.text_secondary))
                         b.btnPrimary.setOnClickListener { onStart(ride) }
                     }
                     "Ongoing" -> {
                         UiKit.setVisible(b.layoutActions, true)
                         UiKit.setVisible(b.btnSecondary, false)
+                        primaryMargin(b, single = true)
+                        b.btnPrimary.isEnabled = true
+                        b.btnPrimary.setTextColor(ctx.getColor(android.R.color.white))
                         b.btnPrimary.text = "Complete ride"
                         b.btnPrimary.setBackgroundColor(ctx.getColor(R.color.success))
                         b.btnPrimary.setOnClickListener { onComplete(ride) }
